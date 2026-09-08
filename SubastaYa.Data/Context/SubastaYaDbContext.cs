@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SubastaYa.Core.Domain.Entities;
-using SubastaYa.Core.Domain.Enums;
+using SubastaYa.Domain.Entities;
+using SubastaYa.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SubastaYa.Data.Context
+namespace SubastaYa.Infrastructure.Context
 {
     public class SubastaYaDbContext : DbContext
     {
