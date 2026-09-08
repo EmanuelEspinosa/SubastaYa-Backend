@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SubastaYa.Application\SubastaYa.Application.csproj" />
-    <ProjectReference Include="..\SubastaYa.Data\SubastaYa.Infrastructure.csproj" />
     <ProjectReference Include="..\SubastaYa.Infrastructure\SubastaYa.Infrastructure.csproj" />
   </ItemGroup>
 
