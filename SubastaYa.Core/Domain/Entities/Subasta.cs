@@ -1,0 +1,24 @@
+using SubastaYa.Core.Domain.Enums;
+
+namespace SubastaYa.Core.Domain.Entities;
+
+public class Subasta
+{
+    public int Id { get; set; }
+    public int VendedorId { get; set; }
+    public int CategoriaId { get; set; }
+    public string Titulo { get; set; } = string.Empty;
+    public string Descripcion { get; set; } = string.Empty;
+    public string UrlImagen { get; set; } = string.Empty;
+    public decimal PrecioBase { get; set; }
+    public decimal IncrementoMinimo { get; set; }
+    public DateTime FechaInicio { get; set; }
+    public DateTime FechaFin { get; set; }
+    public EstadoSubasta Estado { get; set; } = EstadoSubasta.Programada;
+    public int Version { get; set; } = 1; // Optimistic locking
+
+    public Usuario Vendedor { get; set; } = null!;
+    public Categoria Categoria { get; set; } = null!;
+    public ICollection<Puja> Pujas { get; set; } = new List<Puja>();
+    public ICollection<TransaccionLedger> TransaccionesLedger { get; set; } = new List<TransaccionLedger>();
+}
