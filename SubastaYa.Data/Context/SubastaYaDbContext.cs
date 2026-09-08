@@ -2,22 +2,17 @@
 using SubastaYa.Domain.Entities;
 using SubastaYa.Domain.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SubastaYa.Infrastructure.Context
 {
     public class SubastaYaDbContext : DbContext
     {
-        // El constructor recibe la configuración desde la API (como la contraseña de MySQL)
-        // y se la pasa a la clase base de Entity Framework.
         public SubastaYaDbContext(DbContextOptions<SubastaYaDbContext> options)
-            : base(options){
+            : base(options)
+        {
         }
 
-        // Los DbSet le dicen a EF Core cuáles clases deben convertirse en tablas en MySQL.
+        // DbSets para las tablas de la base de datos
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Billetera> Billeteras { get; set; }
         public DbSet<Subasta> Subastas { get; set; }
@@ -26,19 +21,62 @@ namespace SubastaYa.Infrastructure.Context
         public DbSet<TransaccionLedger> TransaccionesLedger { get; set; }
         public DbSet<AuditoriaLog> AuditoriaLogs { get; set; }
 
-
-        // Acá podés forzar configuraciones manuales si las convenciones automáticas no alcanzan
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Relación 1 a 1 
+            // =========================================================================
+            // 1. RELACIONES Y SOLUCIÓN ERROR 1785 (Evitar ciclos de cascada en SQL Server)
+            // =========================================================================
+
+            // Relación 1 a 1: Usuario <-> Billetera
             modelBuilder.Entity<Usuario>()
                 .HasOne(u => u.Billetera)
                 .WithOne(b => b.Usuario)
                 .HasForeignKey<Billetera>(b => b.UsuarioId);
 
-            // 1. Optimistic Locking (Requisito estricto del TP)
+            // Relaciones de Puja (CLAVE PARA EL ERROR 1785):
+            modelBuilder.Entity<Puja>(entity =>
+            {
+                // Con Comprador: Restrict para que no choque con el camino de Subasta/Vendedor
+                entity.HasOne(p => p.Comprador)
+                      .WithMany(u => u.PujasRealizadas)
+                      .HasForeignKey(p => p.CompradorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Con Subasta: Cascade para que si se borra una subasta se borren sus pujas
+                entity.HasOne(p => p.Subasta)
+                      .WithMany(s => s.Pujas)
+                      .HasForeignKey(p => p.SubastaId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Relación de Subasta con Vendedor (Restrict para evitar borrado accidental)
+            modelBuilder.Entity<Subasta>(entity =>
+            {
+                entity.HasOne(s => s.Vendedor)
+                      .WithMany(u => u.SubastasPublicadas)
+                      .HasForeignKey(s => s.VendedorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Relación de TransaccionLedger con Subasta (Nullable / Restrict)
+            modelBuilder.Entity<TransaccionLedger>(entity =>
+            {
+                entity.HasOne(t => t.Subasta)
+                      .WithMany(s => s.TransaccionesLedger)
+                      .HasForeignKey(t => t.SubastaId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Email de Usuario debe ser único en la base de datos
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            // =========================================================================
+            // 2. CONCURRENCIA OPTIMISTA (Optimistic Locking - Requisito estricto del TP)
+            // =========================================================================
             modelBuilder.Entity<Subasta>()
                 .Property(s => s.Version)
                 .IsConcurrencyToken();
@@ -47,7 +85,9 @@ namespace SubastaYa.Infrastructure.Context
                 .Property(b => b.Version)
                 .IsConcurrencyToken();
 
-            // 2. Precisión decimal para todos los montos económicos
+            // =========================================================================
+            // 3. PRECISIÓN DECIMAL (Moneda estándar decimal(18,2))
+            // =========================================================================
             modelBuilder.Entity<Billetera>().Property(b => b.SaldoTotal).HasPrecision(18, 2);
             modelBuilder.Entity<Billetera>().Property(b => b.SaldoRetenido).HasPrecision(18, 2);
             modelBuilder.Entity<Billetera>().Property(b => b.SaldoDisponible).HasPrecision(18, 2);
@@ -58,11 +98,12 @@ namespace SubastaYa.Infrastructure.Context
             modelBuilder.Entity<Puja>().Property(p => p.Monto).HasPrecision(18, 2);
             modelBuilder.Entity<TransaccionLedger>().Property(t => t.Monto).HasPrecision(18, 2);
 
-
-            // --- DATOS SEMILLA (SEED DATA) ---
+            // =========================================================================
+            // 4. DATOS SEMILLA (SEED DATA OBLIGATORIO)
+            // =========================================================================
             var ahora = DateTime.UtcNow;
 
-            // 1. Usuarios obligatorios
+            // Usuarios obligatorios
             modelBuilder.Entity<Usuario>().HasData(
                 new Usuario { Id = 1, Nombre = "Vendedor", Email = "vendedor@test.com", PasswordHash = "hash_dummy", FechaRegistro = ahora },
                 new Usuario { Id = 2, Nombre = "Comprador 1", Email = "comprador1@test.com", PasswordHash = "hash_dummy", FechaRegistro = ahora },
@@ -70,7 +111,7 @@ namespace SubastaYa.Infrastructure.Context
                 new Usuario { Id = 4, Nombre = "Sin Fondos", Email = "sinfondos@test.com", PasswordHash = "hash_dummy", FechaRegistro = ahora }
             );
 
-            // 2. Billeteras con los saldos exactos exigidos por el TP
+            // Billeteras con los saldos exactos exigidos por el TP
             modelBuilder.Entity<Billetera>().HasData(
                 new Billetera { Id = 1, UsuarioId = 1, SaldoTotal = 0, SaldoRetenido = 0, SaldoDisponible = 0, Version = 1 },
                 new Billetera { Id = 2, UsuarioId = 2, SaldoTotal = 150000m, SaldoRetenido = 45000m, SaldoDisponible = 105000m, Version = 1 },
@@ -78,7 +119,7 @@ namespace SubastaYa.Infrastructure.Context
                 new Billetera { Id = 4, UsuarioId = 4, SaldoTotal = 500m, SaldoRetenido = 0, SaldoDisponible = 500m, Version = 1 }
             );
 
-            // 3. Categorías
+            // Categorías
             modelBuilder.Entity<Categoria>().HasData(
                 new Categoria { Id = 1, Nombre = "Tecnología", UrlIcono = "icon-tech" },
                 new Categoria { Id = 2, Nombre = "Coleccionables", UrlIcono = "icon-col" },
@@ -86,7 +127,7 @@ namespace SubastaYa.Infrastructure.Context
                 new Categoria { Id = 4, Nombre = "Vehículos", UrlIcono = "icon-auto" }
             );
 
-            // 4. Subastas con los 5 casos de prueba obligatorios
+            // Subastas con los 5 casos de prueba obligatorios
             modelBuilder.Entity<Subasta>().HasData(
                 // Caso A: Activa estándar (Cierra en 30 min)
                 new Subasta { Id = 1, VendedorId = 1, CategoriaId = 1, Titulo = "PlayStation 5", Descripcion = "Consola", UrlImagen = "url", PrecioBase = 10000m, IncrementoMinimo = 1000m, FechaInicio = ahora.AddHours(-1), FechaFin = ahora.AddMinutes(30), Estado = EstadoSubasta.Activa, Version = 1 },
@@ -100,17 +141,12 @@ namespace SubastaYa.Infrastructure.Context
                 new Subasta { Id = 5, VendedorId = 1, CategoriaId = 4, Titulo = "Bicicleta", Descripcion = "Rodado 29", UrlImagen = "url", PrecioBase = 50000m, IncrementoMinimo = 5000m, FechaInicio = ahora.AddDays(-2), FechaFin = ahora.AddMinutes(-30), Estado = EstadoSubasta.Activa, Version = 1 }
             );
 
-            // 5. Pujas previas para la subasta activa y la subasta ganada
+            // Pujas previas para la subasta activa y la subasta ganada
             modelBuilder.Entity<Puja>().HasData(
-                // 2 pujas previas cargadas en la subasta activa estándar, siendo el líder Comprador 1 con 45.000
                 new Puja { Id = 1, SubastaId = 1, CompradorId = 3, Monto = 40000m, FechaPuja = ahora.AddMinutes(-15) },
                 new Puja { Id = 2, SubastaId = 1, CompradorId = 2, Monto = 45000m, FechaPuja = ahora.AddMinutes(-5) },
-
-                // Puja ganadora de la subasta vencida (Caso D)
                 new Puja { Id = 3, SubastaId = 4, CompradorId = 2, Monto = 35000m, FechaPuja = ahora.AddDays(-1) }
             );
-
-
         }
     }
 }
