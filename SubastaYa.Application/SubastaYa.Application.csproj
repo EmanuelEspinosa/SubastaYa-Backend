@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SubastaYa.Core\SubastaYa.Domain.csproj" />
     <ProjectReference Include="..\SubastaYa.Domain\SubastaYa.Domain.csproj" />
   </ItemGroup>
 
