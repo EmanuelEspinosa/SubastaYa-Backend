@@ -1,4 +1,4 @@
-namespace SubastaYa.Core.Domain.Enums;
+namespace SubastaYa.Domain.Enums;
 
 public enum TipoTransaccionLedger
 {

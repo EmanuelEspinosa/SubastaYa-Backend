@@ -1,5 +1,6 @@
 <Solution>
-  <Project Path="../SubastaYa.Core/SubastaYa.Core.csproj" />
-  <Project Path="../SubastaYa.Data/SubastaYa.Data.csproj" />
+  <Project Path="../SubastaYa.Application/SubastaYa.Application.csproj" Id="706139d0-7389-4a2b-9c7e-7ad4f5683671" />
+  <Project Path="../SubastaYa.Core/SubastaYa.Domain.csproj" />
+  <Project Path="../SubastaYa.Data/SubastaYa.Infrastructure.csproj" />
   <Project Path="SubastaYa.API.csproj" />
 </Solution>

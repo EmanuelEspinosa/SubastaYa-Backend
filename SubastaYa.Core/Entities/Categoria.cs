@@ -1,4 +1,4 @@
-namespace SubastaYa.Core.Domain.Entities;
+namespace SubastaYa.Domain.Entities;
 
 public class Categoria
 {

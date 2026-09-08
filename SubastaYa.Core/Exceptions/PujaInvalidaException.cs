@@ -1,4 +1,4 @@
-namespace SubastaYa.Core.Domain.Exceptions;
+namespace SubastaYa.Domain.Exceptions;
 
 public class PujaInvalidaException : DomainException
 {

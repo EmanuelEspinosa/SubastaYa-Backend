@@ -1,6 +1,6 @@
-using SubastaYa.Core.Domain.Enums;
+using SubastaYa.Domain.Enums;
 
-namespace SubastaYa.Core.Domain.Entities;
+namespace SubastaYa.Domain.Entities;
 
 public class Subasta
 {
