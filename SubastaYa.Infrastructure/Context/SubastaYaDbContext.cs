@@ -141,6 +141,21 @@ namespace SubastaYa.Infrastructure.Context
                 new Subasta { Id = 5, VendedorId = 1, CategoriaId = 4, Titulo = "Bicicleta", Descripcion = "Rodado 29", UrlImagen = "url", PrecioBase = 50000m, IncrementoMinimo = 5000m, FechaInicio = ahora.AddDays(-2), FechaFin = ahora.AddMinutes(-30), Estado = EstadoSubasta.Activa, Version = 1 }
             );
 
+            // 6. Transacciones iniciales del Libro Mayor (Ledger) para justificar los saldos y retenciones
+            modelBuilder.Entity<TransaccionLedger>().HasData(
+                // Depósito inicial de Comprador 1 ($150.000)
+                new TransaccionLedger { Id = 1, BilleteraId = 2, Tipo = TipoTransaccionLedger.Deposito, Monto = 150000m, Fecha = ahora.AddDays(-1) },
+                // Retención inicial por su puja líder en la Subasta 1 ($45.000)
+                new TransaccionLedger { Id = 2, BilleteraId = 2, Tipo = TipoTransaccionLedger.Retencion, Monto = 45000m, Fecha = ahora.AddMinutes(-5), SubastaId = 1 },
+
+                // Depósito inicial de Comprador 2 ($200.000)
+                new TransaccionLedger { Id = 3, BilleteraId = 3, Tipo = TipoTransaccionLedger.Deposito, Monto = 200000m, Fecha = ahora.AddDays(-1) },
+
+                // Depósito inicial de Sin Fondos ($500)
+                new TransaccionLedger { Id = 4, BilleteraId = 4, Tipo = TipoTransaccionLedger.Deposito, Monto = 500m, Fecha = ahora.AddDays(-1) }
+            );
+
+
             // Pujas previas para la subasta activa y la subasta ganada
             modelBuilder.Entity<Puja>().HasData(
                 new Puja { Id = 1, SubastaId = 1, CompradorId = 3, Monto = 40000m, FechaPuja = ahora.AddMinutes(-15) },
