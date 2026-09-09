@@ -6,12 +6,17 @@ using SubastaYa.Domain.Interfaces;
 using SubastaYa.Infrastructure.Context;
 using SubastaYa.Infrastructure.Repositories;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Controladores y Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Registrar el Background Worker para el cierre automático de subastas
+builder.Services.AddHostedService<SubastaYa.API.BackgroundServices.AuctionClosingWorker>();
 
 // 2. Base de datos (EF Core con SQL Server)
 builder.Services.AddDbContext<SubastaYaDbContext>(options =>
