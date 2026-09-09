@@ -1,6 +1,6 @@
 namespace SubastaYa.Domain.Exceptions;
 
-public abstract class DomainException : Exception
+public class DomainException : Exception
 {
-    protected DomainException(string mensaje) : base(mensaje) { }
+    public DomainException(string mensaje) : base(mensaje) { }
 }
