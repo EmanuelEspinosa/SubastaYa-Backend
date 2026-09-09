@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SubastaYa.Domain.Interfaces
 {
-    internal interface ISubastaRepository
+    public interface ISubastaRepository
     {
         // Para Catálogo y Exploración
         Task<IEnumerable<Subasta>> ObtenerTodasAsync();

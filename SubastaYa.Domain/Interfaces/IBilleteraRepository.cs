@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SubastaYa.Domain.Interfaces
 {
-    internal interface IBilleteraRepository
+    public interface IBilleteraRepository
     {
         Task<Billetera?> ObtenerPorUsuarioIdAsync(int usuarioId);
 
