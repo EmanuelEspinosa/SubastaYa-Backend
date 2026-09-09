@@ -34,10 +34,11 @@ public class ExceptionMiddleware
         context.Response.ContentType = "application/json";
 
         // Mapeo preciso de códigos de estado HTTP según la rúbrica del TP
-        var statusCode = exception switch
+var statusCode = exception switch
         {
             SubastaNoEncontradaException => HttpStatusCode.NotFound, // 404
             ConflictoConcurrenciaException or DbUpdateConcurrencyException => HttpStatusCode.Conflict, // 409 Conflict
+            SaldoInsuficienteException or PujaInvalidaException or SubastaNoActivaException => HttpStatusCode.UnprocessableEntity, // 422
             DomainException => HttpStatusCode.BadRequest, // 400 Bad Request
             _ => HttpStatusCode.InternalServerError // 500
         };
