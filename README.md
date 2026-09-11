@@ -1,120 +1,139 @@
 # 🔨 SubastaYa - Plataforma de Subastas en Tiempo Real
 
-Proyecto integral de comercio electrónico y subastas en tiempo real con respaldo transaccional atómico (**Escrow**) y protección contra ofertas tardías (**Anti-Sniping**), desarrollado para la cátedra **Proyecto de Software** de la **Universidad Nacional Arturo Jauretche (UNAJ)**.
+Proyecto integral de comercio electrónico y subastas en tiempo real con respaldo transaccional atómico (**Escrow**), extensión dinámica contra ofertas de último segundo (**Anti-Sniping**) y control de concurrencia optimista, desarrollado para la cátedra **Proyecto de Software** de la **Universidad Nacional Arturo Jauretche (UNAJ)**.
+
+> 🌐 **Interfaz de Usuario (Frontend):**  
+> El cliente web de la aplicación se encuentra disponible en: **[Enlace al Repositorio del Frontend]** *(o en el directorio `/frontend` de esta solución)*.
 
 ---
 
 ## 🏛️ Arquitectura del Sistema (Clean Architecture)
 
-El backend sigue los lineamientos estrictos de **Clean Architecture (Arquitectura Limpia)** desacoplado en 4 proyectos:
+El backend implementa de forma estricta los principios de **Clean Architecture** (Arquitectura Limpia), separando responsabilidades en cuatro capas desacopladas:
 
-```text
+```
 SubastaYa-Backend/
 ├── SubastaYa.Domain/          # Núcleo puro: Entidades, Enums, Excepciones y Contratos de Repositorios.
-├── SubastaYa.Application/     # Casos de uso: DTOs, Servicios de Negocio (Escrow, Anti-Sniping, Billetera).
-├── SubastaYa.Infrastructure/  # Acceso a datos: DbContext, Fluent API, Migraciones EF Core y Repositorios.
-├── SubastaYa.API/             # Presentación: Controladores RESTful, Middleware de Excepciones y Background Worker.
+├── SubastaYa.Application/     # Casos de uso: DTOs, Servicios de Dominio (Escrow, Anti-Sniping, Billetera).
+├── SubastaYa.Infrastructure/  # Acceso a datos: DbContext, Migraciones Code-First y Repositorios EF Core.
+├── SubastaYa.API/             # Presentación: Controladores RESTful, Middleware de Excepciones y Worker.
 └── SubastaYa.slnx             # Archivo de solución unificado.
+```
 
+---
 
-⚙️ Stack Tecnológico
-Lenguaje & Runtime: C# | .NET 8.0 LTS.
-ORM: Entity Framework Core 8 (Enfoque Code-First con Migraciones).
-Motor de Base de Datos: Microsoft SQL Server (LocalDB / Express).
-Manejo de Concurrencia: Optimistic Locking con token de concurrencia (Version).
-Transaccionalidad: Bloques atómicos ACID (TransactionScope) en operaciones financieras de Escrow.
-Procesos en Segundo Plano: IHostedService (BackgroundService) con inyección de IServiceScopeFactory.
-Documentación de API: OpenAPI / Swagger UI interactivo vía Swashbuckle.AspNetCore.
+## ⚙️ Stack Tecnológico
 
-.
-🚀 Guía de Instalación y Puesta en Marcha
-Prerrequisitos
-.NET 8.0 SDK instalado (dotnet --version >= 8.0.x).
-Microsoft SQL Server LocalDB (incluido con Visual Studio o instalable con sqllocaldb).
-Pasos para ejecutar:
+* **Lenguaje & Runtime:** C# | .NET 8.0 LTS.
+* **ORM:** Entity Framework Core 8 (Enfoque Code-First con Migraciones).
+* **Motor de Base de Datos:** Microsoft SQL Server (LocalDB / Express).
+* **Manejo de Concurrencia:** Optimistic Locking con token de concurrencia (`Version`).
+* **Transaccionalidad Financiera (ACID):** Bloques atómicos con `TransactionScope` para las operaciones de Escrow.
+* **Procesos en Segundo Plano:** `BackgroundService` (`AuctionClosingWorker`) para el cierre y liquidación periódica.
+* **Documentación de API:** OpenAPI / Swagger UI interactivo vía Swashbuckle.
 
-1. Clonar el repositorio:
+---
 
-code Bash
+## ⏱️ Sincronización en Tiempo Real (Sala de Subastas)
 
-git clone https://github.com/EmanuelEspinosa/SubastaYa-Backend.git
-cd SubastaYa-Backend
+Siguiendo las alternativas contempladas en la **página 5 del enunciado de la cátedra**, la sincronización de la sala en vivo (reloj visual regresivo, alerta de zona crítica, extensión Anti-Sniping y detección de superación/outbid) se implementa mediante la técnica de **Short-Polling asíncrono**:
 
+* El cliente web realiza peticiones asíncronas cada **2 a 3 segundos** a los endpoints:
+  * `GET /api/auctions/{id}`: Sincroniza el temporizador regresivo y detecta si la `fechaFin` fue extendida por Anti-Sniping.
+  * `GET /api/auctions/{id}/bids`: Actualiza el historial cronológico de ofertas y notifica al usuario si su oferta fue superada en tiempo real.
+* Esta estrategia desacopla el transporte, evita saturación de sockets persistentes y mantiene una respuesta de sub-milisegundos gracias a los índices de base de datos.
 
-2. Configurar la cadena de conexión (si aplica):
-Por defecto, SubastaYa.API/appsettings.json apunta a SQL Server LocalDB:
+---
 
-code JSON
+## 🚀 Guía de Instalación y Puesta en Marcha
 
-"ConnectionStrings": {
-  "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=SubastaYaDb;Trusted_Connection=True;TrustServerCertificate=True;"
-}
+### Prerrequisitos
+* **.NET 8.0 SDK** instalado (`dotnet --version >= 8.0.x`).
+* **Microsoft SQL Server LocalDB** (incluido con Visual Studio o instalable mediante `sqllocaldb`).
 
+### Pasos para ejecutar:
 
-3. Compilar la solución:
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/EmanuelEspinosa/SubastaYa-Backend.git
+   cd SubastaYa-Backend
+   ```
 
-code Bash
+2. **Configuración de Conexión:**  
+   Por defecto, `SubastaYa.API/appsettings.json` apunta a SQL Server LocalDB:
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=SubastaYaDb;Trusted_Connection=True;TrustServerCertificate=True;"
+   }
+   ```
 
-dotnet build
+3. **Compilar la solución:**
+   ```bash
+   dotnet build
+   ```
 
+4. **Ejecutar la API:**
+   ```bash
+   dotnet run --project SubastaYa.API
+   ```
+   *(Al arrancar, la API ejecuta automáticamente `Database.Migrate()` aplicando las migraciones pendientes y cargando el Seed Data inicial).*
 
-4. Ejecutar la API:
+5. **Acceder a la Documentación Interactiva:**  
+   Abrir en el navegador: [http://localhost:5120/swagger](http://localhost:5120/swagger) (o `https://localhost:7000/swagger`).
 
-code Bash
+---
 
-dotnet run --project SubastaYa.API
+## 📌 Datos Semilla Obligatorios (Seed Data)
 
-(Al iniciar, la API aplica automáticamente las migraciones pendientes y carga el Seed Data si la base de datos no existe).
+El sistema inicializa la base de datos con los escenarios exactos pedidos por la cátedra para la mesa de evaluación:
 
-5. Acceder a Swagger UI:
+* **4 Usuarios y Billeteras:**
+  * `vendedor@test.com`: Saldo Total: $0.00.
+  * `comprador1@test.com`: Total: $150,000 | Retenido: $45,000 | Disponible: $105,000 (Postor líder subasta 1).
+  * `comprador2@test.com`: Total: $200,000 | Disponible: $200,000 (Postor habilitado solvente).
+  * `sinfondos@test.com`: Total: $500.00 | Disponible: $500.00 (Caso de prueba para rechazo por saldo insuficiente).
+* **4 Categorías:** Tecnología, Coleccionables, Indumentaria, Vehículos.
+* **5 Subastas (Casos de prueba):**
+  1. **Activa estándar:** Cierra en 30 min (con 2 pujas previas cargadas; lidera Comprador 1 con $45,000).
+  2. **Activa crítica:** Cierra en < 2 min (lista para probar alerta visual y extensión Anti-Sniping).
+  3. **Próxima:** Inicio programado a +24 hs (pujas bloqueadas por regla de negocio).
+  4. **Vencida con ganador:** Liquidada por el Worker automáticamente a estado `Finalizada` con transferencia de fondos.
+  5. **Vencida desierta:** Pasada por el Worker automáticamente a estado `Desierta`.
+* **Libro Mayor (`TransaccionesLedger`):** Asientos contables que justifican desde el inicio los depósitos y el saldo retenido de $45,000.
 
-Abrir en el navegador: http://localhost:5120/swagger (o https://localhost:7000/swagger).
+---
 
+## 📡 Endpoints de la API REST
 
+### Subastas (`/api/auctions`)
+| Método | Endpoint | Descripción | Códigos de Estado HTTP |
+|:---:|---|---|---|
+| **GET** | `/api/auctions` | Catálogo con filtros por estado (`?estado=`) y categoría (`?categoriaId=`). | `200 OK` |
+| **GET** | `/api/auctions/{id}` | Detalle completo de la subasta, estado y puja líder. | `200 OK`, `404 Not Found` |
+| **POST** | `/api/auctions` | Creación de nueva subasta con validación de fechas y precios. | `201 Created`, `422 Unprocessable` |
+| **POST** | `/api/auctions/{id}/bids` | Registro de puja (evalúa saldo, ejecuta Escrow atómico y Anti-Sniping). | `200 OK`, `409 Conflict`, `422 Unprocessable` |
+| **GET** | `/api/auctions/{id}/bids` | Historial cronológico de pujas anonimizadas para la sala en vivo. | `200 OK`, `404 Not Found` |
 
-📌 Datos Semilla Iniciales (Seed Data)
-El sistema precarga automáticamente los siguientes escenarios para pruebas:
+### Billetera Virtual (`/api/wallet`)
+| Método | Endpoint | Descripción | Códigos de Estado HTTP |
+|:---:|---|---|---|
+| **GET** | `/api/wallet/balance?usuarioId={id}` | Desglose de saldos: Total, Retenido en Escrow y Disponible. | `200 OK`, `404 Not Found` |
+| **POST** | `/api/wallet/deposit` | Acreditación simulada de fondos con asiento en Ledger y auditoría. | `200 OK`, `400 Bad Request` |
 
-. 4 Usuarios y Billeteras:
-vendedor@test.com (Saldo Total: $0.00).
-comprador1@test.com (Total: $150,000 | Retenido: $45,000 | Disponible: $105,000).
-comprador2@test.com (Total: $200,000 | Disponible: $200,000).
-sinfondos@test.com (Total: $500.00 | Disponible: $500.00).
+---
 
-. 4 Categorías: Tecnología, Coleccionables, Indumentaria, Vehículos.
+## ⚡ Prueba de Concurrencia Optimista (Stress Test - HTTP 409 Conflict)
 
-. 5 Subastas (Casos de prueba):
-1 - Activa estándar: Cierra en 30 min (lidera Comprador 1 con $45,000).
-2 - Activa crítica: Cierra en < 2 min (lista para probar extensión Anti-Sniping).
-3 - Próxima: Inicio programado a +24 hs (pujas bloqueadas).
-4 - Vencida con ganador: Liquidada por el Worker automáticamente a estado Finalizada.
-5 - Vencida desierta: Cerrada por el Worker automáticamente a estado Desierta.
-. Libro Mayor (TransaccionesLedger): Asientos contables que respaldan los saldos y retenciones desde el inicio.
+En cumplimiento con la **Sección 4.1 del documento de la cátedra**, se implementó el mecanismo de **Optimistic Locking** para evitar que dos postores puedan registrar ofertas líderes en el mismo milisegundo basándose en un estado desactualizado.
 
+### Script de Prueba de Estrés (Bash / Linux / macOS / Git Bash):
 
-📡 Endpoints de la API REST
-Subastas (/api/auctions)
-Método	Endpoint	Descripción	Códigos HTTP
-GET	/api/auctions	Listado con filtros por estado (?estado=) y categoría (?categoriaId=).	200 OK
-GET	/api/auctions/{id}	Detalle completo de una subasta y puja líder.	200 OK, 404 Not Found
-POST	/api/auctions	Publicación de nueva subasta.	201 Created, 422 Unprocessable
-POST	/api/auctions/{id}/bids	Registro de oferta en vivo (ejecuta Escrow y Anti-sniping).	200 OK, 409 Conflict, 422 Unprocessable
-GET	/api/auctions/{id}/bids	Historial de pujas con anonimización de postores.	200 OK, 404 Not Found
-
-
-Billetera (/api/wallet)
-Método	Endpoint	Descripción	Códigos HTTP
-GET	/api/wallet/balance?usuarioId={id}	Consulta de saldos (Total, Retenido, Disponible).	200 OK, 404 Not Found
-POST	/api/wallet/deposit	Acreditación simulada de fondos con asiento en Ledger.	200 OK, 400 Bad Request
-
-⚡ Prueba de Concurrencia Optimista (Stress Test - HTTP 409 Conflict)
-Para validar el requerimiento estricto de concurrencia optimista ante ofertas simultáneas en el mismo milisegundo:
-Ejecución con script de Bash (Linux / macOS / Git Bash):
-
-code Bash
-
+```bash
 #!/bin/bash
-# Disparo en paralelo de dos ofertas idénticas con la misma versión inicial
+# Disparo en paralelo de dos ofertas simultáneas para la misma subasta con la misma versión inicial
+
+echo ">> Disparando pujas concurrentes al mismo milisegundo..."
+
 curl -i -X POST http://localhost:5120/api/auctions/1/bids \
   -H "Content-Type: application/json" \
   -d '{"subastaId":1,"compradorId":3,"monto":50000}' &
@@ -124,17 +143,18 @@ curl -i -X POST http://localhost:5120/api/auctions/1/bids \
   -d '{"subastaId":1,"compradorId":2,"monto":50000}' &
 
 wait
+echo ">> Fin de la prueba."
+```
 
+### Justificación Técnica del Resultado:
+1. **Primera Petición procesada:** Encuentra la subasta en su versión actual, procesa el Escrow de forma atómica dentro de un `TransactionScope`, incrementa `subasta.Version++` y responde **HTTP 200 OK**.
+2. **Segunda Petición procesada:** Intenta persistir cambios con la versión desactualizada. SQL Server detecta la discrepancia en el `WHERE Id = @id AND Version = @versionOriginal`, afectando 0 filas y provocando que Entity Framework Core dispare una `DbUpdateConcurrencyException`.
+3. **Manejo Semántico de Excepciones:** Nuestro `ExceptionMiddleware` intercepta la excepción y retorna de inmediato **HTTP 409 Conflict** con el siguiente payload:
 
-Comportamiento Esperado:
-1. La primera petición en ser confirmada actualiza la subasta, incrementa subasta.Version y retorna HTTP 200 OK.
-2. La segunda petición colisiona con el token de concurrencia (Version desactualizada), provocando que Entity Framework Core dispare DbUpdateConcurrencyException.
-3. El ExceptionMiddleware captura la excepción y retorna inmediatamente HTTP 409 Conflict con el payload:
-
-code JSON
-
+```json
 {
   "statusCode": 409,
   "message": "El recurso fue modificado concurrentemente por otra transacción. Reintente.",
   "errorType": "DbUpdateConcurrencyException"
 }
+```
