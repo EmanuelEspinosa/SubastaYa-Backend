@@ -18,9 +18,12 @@ public class SubastaService : ISubastaService
         _pujaRepository = pujaRepository;
     }
 
-    public async Task<IEnumerable<SubastaDto>> ObtenerCatalogoAsync(EstadoSubasta? estado = null, int? categoriaId = null)
+    public async Task<IEnumerable<SubastaDto>> ObtenerCatalogoAsync(int? vendedorId = null ,EstadoSubasta? estado = null, int? categoriaId = null)
     {
         var subastas = await _subastaRepository.ObtenerTodasAsync();
+
+        if (vendedorId.HasValue)
+            subastas = subastas.Where(s => s.VendedorId == vendedorId.Value);
 
         if (estado.HasValue)
             subastas = subastas.Where(s => s.Estado == estado.Value);
