@@ -18,7 +18,7 @@ public class SubastaService : ISubastaService
         _pujaRepository = pujaRepository;
     }
 
-    public async Task<IEnumerable<SubastaDto>> ObtenerCatalogoAsync(int? vendedorId = null ,EstadoSubasta? estado = null, int? categoriaId = null)
+    public async Task<IEnumerable<SubastaDto>> ObtenerCatalogoAsync(int? vendedorId = null ,EstadoSubasta? estado = null, int? categoriaId = null, int? compradorId = null)
     {
         var subastas = await _subastaRepository.ObtenerTodasAsync();
 
@@ -30,6 +30,10 @@ public class SubastaService : ISubastaService
 
         if (categoriaId.HasValue)
             subastas = subastas.Where(s => s.CategoriaId == categoriaId.Value);
+
+        // Nuevo filtro: Evalúa si el comprador hizo al menos una puja en la subasta
+        if (compradorId.HasValue)
+            subastas = subastas.Where(s => s.Pujas != null && s.Pujas.Any(p => p.CompradorId == compradorId.Value));
 
         var resultado = new List<SubastaDto>();
         foreach (var subasta in subastas)

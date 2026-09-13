@@ -24,9 +24,10 @@ public class AuctionsController : ControllerBase
     public async Task<ActionResult<IEnumerable<SubastaDto>>> ObtenerCatalogo(
         [FromQuery] int? vendedorId,
         [FromQuery] EstadoSubasta? estado,
-        [FromQuery] int? categoriaId)
+        [FromQuery] int? categoriaId,
+        [FromQuery] int? compradorId)
     {
-        var subastas = await _subastaService.ObtenerCatalogoAsync(vendedorId,estado, categoriaId);
+        var subastas = await _subastaService.ObtenerCatalogoAsync(vendedorId,estado, categoriaId, compradorId);
         return Ok(subastas);
     }
 
