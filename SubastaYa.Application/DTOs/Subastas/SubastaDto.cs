@@ -14,6 +14,7 @@ public class SubastaDto
     public string UrlImagen { get; set; } = string.Empty;
     public decimal PrecioBase { get; set; }
     public decimal IncrementoMinimo { get; set; }
+    public int? CompradorLiderId { get; set; }
     public decimal OfertaMasAltaActual { get; set; }
     public int CantidadOfertas { get; set; }
     public DateTime FechaInicio { get; set; }
