@@ -103,12 +103,15 @@ namespace SubastaYa.Infrastructure.Context
             // =========================================================================
             var ahora = DateTime.UtcNow;
 
-            // Usuarios obligatorios
+            // Hash oficial de BCrypt para la contraseña "123456"
+            string passwordHashDefault = "$2a$10$21Oux/EE3yLmazVw64BjbeD6.7KKALDrKfOiWVLqBsrSlsEM7Nc9G";
+
+            // Usuarios obligatorios con contraseña "123456"
             modelBuilder.Entity<Usuario>().HasData(
-                new Usuario { Id = 1, Nombre = "Vendedor", Email = "vendedor@test.com", PasswordHash = "hash_dummy", FechaRegistro = ahora },
-                new Usuario { Id = 2, Nombre = "Comprador 1", Email = "comprador1@test.com", PasswordHash = "hash_dummy", FechaRegistro = ahora },
-                new Usuario { Id = 3, Nombre = "Comprador 2", Email = "comprador2@test.com", PasswordHash = "hash_dummy", FechaRegistro = ahora },
-                new Usuario { Id = 4, Nombre = "Sin Fondos", Email = "sinfondos@test.com", PasswordHash = "hash_dummy", FechaRegistro = ahora }
+                new Usuario { Id = 1, Nombre = "Vendedor", Email = "vendedor@test.com", PasswordHash = passwordHashDefault, FechaRegistro = ahora },
+                new Usuario { Id = 2, Nombre = "Comprador 1", Email = "comprador1@test.com", PasswordHash = passwordHashDefault, FechaRegistro = ahora },
+                new Usuario { Id = 3, Nombre = "Comprador 2", Email = "comprador2@test.com", PasswordHash = passwordHashDefault, FechaRegistro = ahora },
+                new Usuario { Id = 4, Nombre = "Sin Fondos", Email = "sinfondos@test.com", PasswordHash = passwordHashDefault, FechaRegistro = ahora }
             );
 
             // Billeteras con los saldos exactos exigidos por el TP
