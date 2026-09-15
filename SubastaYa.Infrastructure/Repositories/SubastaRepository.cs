@@ -21,10 +21,11 @@ namespace SubastaYa.Infrastructure.Repositories
 
         public async Task<IEnumerable<Subasta>> ObtenerTodasAsync()
         {
-            // Traemos las subastas incluyendo la información de la categoría y el vendedor
+            // Traemos las subastas incluyendo la información de la categoría y el vendedor y puja
             return await _context.Subastas
                 .Include(s => s.Categoria)
                 .Include(s => s.Vendedor)
+                .Include(s => s.Pujas)
                 .ToListAsync();
         }
 
