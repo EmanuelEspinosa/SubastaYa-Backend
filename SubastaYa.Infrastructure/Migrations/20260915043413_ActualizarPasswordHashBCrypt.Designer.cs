@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SubastaYa.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using SubastaYa.Infrastructure.Context;
 namespace SubastaYa.Infrastructure.Migrations
 {
     [DbContext(typeof(SubastaYaDbContext))]
-    partial class SubastaYaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260915043413_ActualizarPasswordHashBCrypt")]
+    partial class ActualizarPasswordHashBCrypt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,7 +215,7 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 1,
                             CompradorId = 3,
-                            FechaPuja = new DateTime(2026, 9, 15, 5, 31, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaPuja = new DateTime(2026, 9, 15, 4, 19, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Monto = 40000m,
                             SubastaId = 1
                         },
@@ -220,7 +223,7 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 2,
                             CompradorId = 2,
-                            FechaPuja = new DateTime(2026, 9, 15, 5, 41, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaPuja = new DateTime(2026, 9, 15, 4, 29, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Monto = 45000m,
                             SubastaId = 1
                         },
@@ -228,7 +231,7 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 3,
                             CompradorId = 2,
-                            FechaPuja = new DateTime(2026, 9, 14, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaPuja = new DateTime(2026, 9, 14, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Monto = 35000m,
                             SubastaId = 4
                         });
@@ -296,8 +299,8 @@ namespace SubastaYa.Infrastructure.Migrations
                             CategoriaId = 1,
                             Descripcion = "Disfrutá de una carga instantánea gracias a su SSD de alta velocidad de 825GB. Olvidate de las esperas y sumergite directamente en la acción con gráficos impresionantes en 4K y tecnología Ray Tracing, que añade un realismo asombroso con sombras y reflejos fieles a la realidad.",
                             Estado = 2,
-                            FechaFin = new DateTime(2026, 9, 15, 6, 16, 3, 130, DateTimeKind.Utc).AddTicks(611),
-                            FechaInicio = new DateTime(2026, 9, 15, 4, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaFin = new DateTime(2026, 9, 15, 5, 4, 10, 219, DateTimeKind.Utc).AddTicks(6208),
+                            FechaInicio = new DateTime(2026, 9, 15, 3, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             IncrementoMinimo = 1000m,
                             PrecioBase = 10000m,
                             Titulo = "PlayStation 5",
@@ -311,8 +314,8 @@ namespace SubastaYa.Infrastructure.Migrations
                             CategoriaId = 1,
                             Descripcion = "Elevá tu experiencia tecnológica con el Apple iPhone 13 (128 GB) en un sofisticado color Azul. Este smartphone combina un rendimiento excepcional con un diseño elegante y funciones avanzadas para que disfrutes de cada momento al máximo. Chip A15 Bionic Súper Rápido. Sistema de Cámaras Doble Avanzado. Pantalla Super Retina XDR Brillante de 6.1 pulgadas.",
                             Estado = 2,
-                            FechaFin = new DateTime(2026, 9, 15, 5, 47, 3, 130, DateTimeKind.Utc).AddTicks(611),
-                            FechaInicio = new DateTime(2026, 9, 15, 3, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaFin = new DateTime(2026, 9, 15, 4, 35, 10, 219, DateTimeKind.Utc).AddTicks(6208),
+                            FechaInicio = new DateTime(2026, 9, 15, 2, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             IncrementoMinimo = 500m,
                             PrecioBase = 5000m,
                             Titulo = "Apple iPhone 13",
@@ -326,8 +329,8 @@ namespace SubastaYa.Infrastructure.Migrations
                             CategoriaId = 2,
                             Descripcion = "Figuras de acción articuladas con sus accesorios de lucha listos para el combate. Dimensiones: 30 cm. Personajes: HUNTSMAN, WHITE SHADE, SKULL CRACKER.",
                             Estado = 1,
-                            FechaFin = new DateTime(2026, 9, 17, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
-                            FechaInicio = new DateTime(2026, 9, 16, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaFin = new DateTime(2026, 9, 17, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
+                            FechaInicio = new DateTime(2026, 9, 16, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             IncrementoMinimo = 2000m,
                             PrecioBase = 20000m,
                             Titulo = "Figura De Accion Articulada",
@@ -341,8 +344,8 @@ namespace SubastaYa.Infrastructure.Migrations
                             CategoriaId = 3,
                             Descripcion = "Confeccionada con materiales reciclados y tecnología AEROREADY para mantener la comodidad y frescura en todo momento. Ajustado. Cuello en V. 100% poliéster reciclado. AEROREADY. 8 Tiras aplicadas. Escudo de Boca Juniors tejido. Detalle “1905” aplicado en la nuca. Franja icónica dorada.",
                             Estado = 2,
-                            FechaFin = new DateTime(2026, 9, 15, 5, 36, 3, 130, DateTimeKind.Utc).AddTicks(611),
-                            FechaInicio = new DateTime(2026, 9, 13, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaFin = new DateTime(2026, 9, 15, 4, 24, 10, 219, DateTimeKind.Utc).AddTicks(6208),
+                            FechaInicio = new DateTime(2026, 9, 13, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             IncrementoMinimo = 1500m,
                             PrecioBase = 30000m,
                             Titulo = "Camiseta de Fútbol",
@@ -356,8 +359,8 @@ namespace SubastaYa.Infrastructure.Migrations
                             CategoriaId = 4,
                             Descripcion = "La Kanji ON WHEELS Rodado 29 es una bicicleta de montaña diseñada para quienes buscan rendimiento, comodidad y durabilidad en cada recorrido. Con un diseño moderno y componentes confiables, es ideal tanto para caminos urbanos exigentes como para aventuras off-road.",
                             Estado = 2,
-                            FechaFin = new DateTime(2026, 9, 15, 5, 16, 3, 130, DateTimeKind.Utc).AddTicks(611),
-                            FechaInicio = new DateTime(2026, 9, 13, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaFin = new DateTime(2026, 9, 15, 4, 4, 10, 219, DateTimeKind.Utc).AddTicks(6208),
+                            FechaInicio = new DateTime(2026, 9, 13, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             IncrementoMinimo = 5000m,
                             PrecioBase = 50000m,
                             Titulo = "Bicicleta Kanji R/29",
@@ -404,7 +407,7 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 1,
                             BilleteraId = 2,
-                            Fecha = new DateTime(2026, 9, 14, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            Fecha = new DateTime(2026, 9, 14, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Monto = 150000m,
                             Tipo = 1
                         },
@@ -412,7 +415,7 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 2,
                             BilleteraId = 2,
-                            Fecha = new DateTime(2026, 9, 15, 5, 41, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            Fecha = new DateTime(2026, 9, 15, 4, 29, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Monto = 45000m,
                             SubastaId = 1,
                             Tipo = 2
@@ -421,7 +424,7 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 3,
                             BilleteraId = 3,
-                            Fecha = new DateTime(2026, 9, 14, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            Fecha = new DateTime(2026, 9, 14, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Monto = 200000m,
                             Tipo = 1
                         },
@@ -429,7 +432,7 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 4,
                             BilleteraId = 4,
-                            Fecha = new DateTime(2026, 9, 14, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            Fecha = new DateTime(2026, 9, 14, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Monto = 500m,
                             Tipo = 1
                         });
@@ -470,33 +473,33 @@ namespace SubastaYa.Infrastructure.Migrations
                         {
                             Id = 1,
                             Email = "vendedor@test.com",
-                            FechaRegistro = new DateTime(2026, 9, 15, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaRegistro = new DateTime(2026, 9, 15, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Nombre = "Vendedor",
-                            PasswordHash = "$2a$10$21Oux/EE3yLmazVw64BjbeD6.7KKALDrKfOiWVLqBsrSlsEM7Nc9G"
+                            PasswordHash = "$2a$11$e/y8Yw0P5g9A1K4v1f8Sye1O6u6Iq3q5/6W9U0.4A8S.3A2A8S.2S"
                         },
                         new
                         {
                             Id = 2,
                             Email = "comprador1@test.com",
-                            FechaRegistro = new DateTime(2026, 9, 15, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaRegistro = new DateTime(2026, 9, 15, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Nombre = "Comprador 1",
-                            PasswordHash = "$2a$10$21Oux/EE3yLmazVw64BjbeD6.7KKALDrKfOiWVLqBsrSlsEM7Nc9G"
+                            PasswordHash = "$2a$11$e/y8Yw0P5g9A1K4v1f8Sye1O6u6Iq3q5/6W9U0.4A8S.3A2A8S.2S"
                         },
                         new
                         {
                             Id = 3,
                             Email = "comprador2@test.com",
-                            FechaRegistro = new DateTime(2026, 9, 15, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaRegistro = new DateTime(2026, 9, 15, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Nombre = "Comprador 2",
-                            PasswordHash = "$2a$10$21Oux/EE3yLmazVw64BjbeD6.7KKALDrKfOiWVLqBsrSlsEM7Nc9G"
+                            PasswordHash = "$2a$11$e/y8Yw0P5g9A1K4v1f8Sye1O6u6Iq3q5/6W9U0.4A8S.3A2A8S.2S"
                         },
                         new
                         {
                             Id = 4,
                             Email = "sinfondos@test.com",
-                            FechaRegistro = new DateTime(2026, 9, 15, 5, 46, 3, 130, DateTimeKind.Utc).AddTicks(611),
+                            FechaRegistro = new DateTime(2026, 9, 15, 4, 34, 10, 219, DateTimeKind.Utc).AddTicks(6208),
                             Nombre = "Sin Fondos",
-                            PasswordHash = "$2a$10$21Oux/EE3yLmazVw64BjbeD6.7KKALDrKfOiWVLqBsrSlsEM7Nc9G"
+                            PasswordHash = "$2a$11$e/y8Yw0P5g9A1K4v1f8Sye1O6u6Iq3q5/6W9U0.4A8S.3A2A8S.2S"
                         });
                 });
 
