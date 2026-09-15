@@ -1,12 +1,13 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SubastaYa.API.Middlewares;
 using SubastaYa.Application.Interfaces;
 using SubastaYa.Application.Services;
 using SubastaYa.Domain.Interfaces;
 using SubastaYa.Infrastructure.Context;
 using SubastaYa.Infrastructure.Repositories;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,8 +36,34 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IBilleteraService, BilleteraService>();
 builder.Services.AddScoped<ISubastaService, SubastaService>();
 builder.Services.AddScoped<IPujaService, PujaService>();
+builder.Services.AddScoped<IAuthService, AuthService>(); // 👈 Inyección del Servicio de Auth
 
-// 5. Configurar CORS para cuando conectemos el Frontend
+// 5. Configurar Middleware de Autenticación con JWT Bearer
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "ClaveSecretaUltraSeguraParaSubastaYa2026!");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings["Issuer"] ?? "SubastaYaAPI",
+        ValidateAudience = true,
+        ValidAudience = jwtSettings["Audience"] ?? "SubastaYaClient",
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+// 6. Configurar CORS para cuando conectemos el Frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -49,17 +76,17 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 6. Aplicar migraciones pendientes automáticamente al arrancar
+// 7. Aplicar migraciones pendientes automáticamente al arrancar
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<SubastaYaDbContext>();
     dbContext.Database.Migrate();
 }
 
-// 7. Middleware global para manejo de errores (400, 404, 409 Conflict)
+// 8. Middleware global para manejo de errores (400, 404, 409 Conflict)
 app.UseMiddleware<ExceptionMiddleware>();
 
-// 8. Pipeline HTTP
+// 9. Pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -67,9 +94,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
 
+// ⚠️ Importante: UseAuthentication debe ir SIEMPRE antes de UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
