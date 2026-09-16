@@ -36,7 +36,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IBilleteraService, BilleteraService>();
 builder.Services.AddScoped<ISubastaService, SubastaService>();
 builder.Services.AddScoped<IPujaService, PujaService>();
-builder.Services.AddScoped<IAuthService, AuthService>(); // 👈 Inyección del Servicio de Auth
+builder.Services.AddScoped<IAuthService, AuthService>(); 
 
 // 5. Configurar Middleware de Autenticación con JWT Bearer
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -96,7 +96,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-// ⚠️ Importante: UseAuthentication debe ir SIEMPRE antes de UseAuthorization
 app.UseAuthentication();
 app.UseAuthorization();
 
