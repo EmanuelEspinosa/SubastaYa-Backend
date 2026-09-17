@@ -87,6 +87,7 @@ public class SubastaService : ISubastaService
             UrlImagen = subasta.UrlImagen,
             PrecioBase = subasta.PrecioBase,
             IncrementoMinimo = subasta.IncrementoMinimo,
+            CompradorLiderId = pujaAlta?.CompradorId, // <-- ¡ESTA ERA LA LÍNEA QUE FALTABA!
             OfertaMasAltaActual = pujaAlta?.Monto ?? subasta.PrecioBase,
             CantidadOfertas = pujas.Count(),
             FechaInicio = subasta.FechaInicio,
