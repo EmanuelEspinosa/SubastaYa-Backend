@@ -30,4 +30,12 @@ public class WalletsController : ControllerBase
         var balanceActualizado = await _billeteraService.CargarSaldoAsync(dto);
         return Ok(balanceActualizado);
     }
+
+    // GET /api/wallet/transactions?usuarioId=2 (Historial de Movimientos del Ledger)
+    [HttpGet("transactions")]
+    public async Task<ActionResult<IEnumerable<TransaccionLedgerDto>>> ObtenerTransacciones([FromQuery] int usuarioId)
+    {
+        var movimientos = await _billeteraService.ObtenerMovimientosPorUsuarioIdAsync(usuarioId);
+        return Ok(movimientos);
+    }
 }

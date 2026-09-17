@@ -6,4 +6,5 @@ public interface IBilleteraService
 {
     Task<BilleteraDto> ObtenerSaldoPorUsuarioIdAsync(int usuarioId);
     Task<BilleteraDto> CargarSaldoAsync(CargarSaldoDto dto);
+    Task<IEnumerable<TransaccionLedgerDto>> ObtenerMovimientosPorUsuarioIdAsync(int usuarioId); 
 }
