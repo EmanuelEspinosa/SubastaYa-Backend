@@ -84,4 +84,22 @@ public class BilleteraService : IBilleteraService
             SaldoDisponible = billetera.SaldoDisponible
         };
     }
+    public async Task<IEnumerable<TransaccionLedgerDto>> ObtenerMovimientosPorUsuarioIdAsync(int usuarioId)
+    {
+        var billetera = await _billeteraRepository.ObtenerPorUsuarioIdAsync(usuarioId);
+        if (billetera == null)
+            return Enumerable.Empty<TransaccionLedgerDto>();
+
+        var movimientos = await _ledgerRepository.ObtenerPorBilleteraIdAsync(billetera.Id);
+
+        return movimientos.Select(m => new TransaccionLedgerDto
+        {
+            Id = m.Id,
+            BilleteraId = m.BilleteraId,
+            Tipo = m.Tipo,
+            Monto = m.Monto,
+            Fecha = m.Fecha,
+            SubastaId = m.SubastaId
+        });
+    }
 }
