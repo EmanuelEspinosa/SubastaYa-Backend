@@ -119,8 +119,8 @@ public class SubastaService : ISubastaService
             UrlImagen = dto.UrlImagen,
             PrecioBase = dto.PrecioBase,
             IncrementoMinimo = dto.IncrementoMinimo,
-            FechaInicio = dto.FechaInicio,
-            FechaFin = dto.FechaFin,
+            FechaInicio = dto.FechaInicio.ToUniversalTime(),
+            FechaFin = dto.FechaFin.ToUniversalTime(),
             Estado = estadoInicial,
             Version = 1
         };
