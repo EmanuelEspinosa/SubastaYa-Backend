@@ -3,7 +3,7 @@
 Proyecto integral de comercio electrónico y subastas en tiempo real con respaldo transaccional atómico (**Escrow**), extensión dinámica contra ofertas de último segundo (**Anti-Sniping**) y control de concurrencia optimista, desarrollado para la cátedra **Proyecto de Software** de la **Universidad Nacional Arturo Jauretche (UNAJ)**.
 
 > 🌐 **Interfaz de Usuario (Frontend):**  
-> El cliente web de la aplicación se encuentra disponible en: **[Enlace al Repositorio del Frontend]** *(o en el directorio `/frontend` de esta solución)*.
+> El cliente web de la aplicación se encuentra disponible en: **https://github.com/EmanuelEspinosa/SubastaYa-Frontend** 
 
 ---
 
