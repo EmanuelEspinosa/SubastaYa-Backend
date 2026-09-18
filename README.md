@@ -102,13 +102,41 @@ El sistema inicializa la base de datos con los escenarios exactos pedidos por la
 * **Libro Mayor (`TransaccionesLedger`):** Asientos contables que justifican desde el inicio los depósitos y el saldo retenido de $45,000.
 
 ---
+## 🔒 Módulo de Autenticación & Seguridad (JWT + BCrypt)
 
+La seguridad del sistema está diseñada protegiendo las operaciones financieras y de subasta mediante tokens criptográficos y cifrado de contraseñas.
+
+### 1. Desacoplamiento con DTOs (Data Transfer Objects)
+Para proteger el modelo del dominio y no exponer datos sensibles (como `PasswordHash`), la comunicación se realiza mediante contratos estrictos en `SubastaYa.Application.DTOs.Auth`:
+
+* **`LoginDto`**: Captura `Email` y `Password` en texto plano.
+* **`RegistroDto`**: Captura `Nombre`, `Email` y `Password`.
+* **`AuthResponseDto`**: Devuelve al cliente el `UsuarioId`, `Nombre`, `Email` y el `Token` JWT.
+
+### 2. Cifrado de Contraseñas con BCrypt
+* **Protección de Credenciales:** Las contraseñas en texto plano enviadas desde el frontend son procesadas con `BCrypt.Net` generando un *Salting* automático e indivisible.
+* **Verificación Unidireccional:** Durante el login (`AuthService.LoginAsync`), la clave ingresada se verifica contra el hash mediante `BCrypt.Verify()` sin desencriptar el valor almacenado.
+
+### 3. Emisión de Tokens JWT (JSON Web Tokens)
+Al autenticarse o registrarse exitosamente, la API genera un token de acceso firmado digitalmente:
+
+* **Claims Integrados:** Contiene afirmaciones con la identidad del usuario (`NameIdentifier`, `Name`, `Email`), permitiendo a los controladores conocer quién realiza cada acción sin consultar la base de datos en cada petición.
+* **Tiempo de Vida:** Configurado a **7 días** (`DateTime.UtcNow.AddDays(7)`). Cumplido ese plazo, el token expira exigiendo reautenticación.
+* **Firma Criptográfica:** Firmado con la clave secreta simétrica mediante el algoritmo `HmacSha256Signature`.
+* **Configuración CERO Tolerancia (`ClockSkew = TimeSpan.Zero`):** El token caduca exactamente al segundo programado.
+
+### 4. Credencial Universal de Prueba  
+
+Todos los usuarios precargados en la base de datos (`vendedor@test.com`, `comprador1@test.com`, `comprador2@test.com`, `sinfondos@test.com`) utilizan la contraseña: **`123456`**.
+
+
+---
 ## 📡 Endpoints de la API REST
 
 ### Subastas (`/api/auctions`)
 | Método | Endpoint | Descripción | Códigos de Estado HTTP |
 |:---:|---|---|---|
-| **GET** | `/api/auctions` | Catálogo con filtros por estado (`?estado=`) y categoría (`?categoriaId=`). | `200 OK` |
+| **GET** | `/api/auctions` | Catálogo con filtros por estado (`?estado=`), categoría (`?categoriaId=`), por comprador (`?compradorId=`) y por vendedor (`?vendedorId=`)| `200 OK` |
 | **GET** | `/api/auctions/{id}` | Detalle completo de la subasta, estado y puja líder. | `200 OK`, `404 Not Found` |
 | **POST** | `/api/auctions` | Creación de nueva subasta con validación de fechas y precios. | `201 Created`, `422 Unprocessable` |
 | **POST** | `/api/auctions/{id}/bids` | Registro de puja (evalúa saldo, ejecuta Escrow atómico y Anti-Sniping). | `200 OK`, `409 Conflict`, `422 Unprocessable` |
@@ -118,7 +146,17 @@ El sistema inicializa la base de datos con los escenarios exactos pedidos por la
 | Método | Endpoint | Descripción | Códigos de Estado HTTP |
 |:---:|---|---|---|
 | **GET** | `/api/wallet/balance?usuarioId={id}` | Desglose de saldos: Total, Retenido en Escrow y Disponible. | `200 OK`, `404 Not Found` |
+| **GET** | `/api/wallet/transactions?usuarioId={id}` | Historial de moviminetos financieros. Permite consultar detalle de ingresos, retenciones por ofertas, liberaciones y débitos finales por subastas ganadas | `200 OK` |
 | **POST** | `/api/wallet/deposit` | Acreditación simulada de fondos con asiento en Ledger y auditoría. | `200 OK`, `400 Bad Request` |
+
+### Autenticación (`/api/auth`)
+| Método | Endpoint | Descripción | Códigos de Estado HTTP |
+|:---:|---|---|---|
+| **POST** | `/api/auth/register` | Registro de nuevos usuarios con cifrado de contraseña (BCrypt), creación automática de Billetera Virtual en $0 y emisión de token JWT. | `200 OK`, `400 Bad Request` |
+| **POST** | `/api/auth/login` | Validación de credenciales (email y contraseña con BCrypt) y emisión de token de autenticación JWT. | `200 OK`, `401 Unauthorized` |
+
+
+
 
 ---
 

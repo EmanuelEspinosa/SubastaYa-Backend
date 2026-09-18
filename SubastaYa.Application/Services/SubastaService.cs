@@ -31,7 +31,6 @@ public class SubastaService : ISubastaService
         if (categoriaId.HasValue)
             subastas = subastas.Where(s => s.CategoriaId == categoriaId.Value);
 
-        // Nuevo filtro: Evalúa si el comprador hizo al menos una puja en la subasta
         if (compradorId.HasValue)
             subastas = subastas.Where(s => s.Pujas != null && s.Pujas.Any(p => p.CompradorId == compradorId.Value));
 
@@ -87,7 +86,7 @@ public class SubastaService : ISubastaService
             UrlImagen = subasta.UrlImagen,
             PrecioBase = subasta.PrecioBase,
             IncrementoMinimo = subasta.IncrementoMinimo,
-            CompradorLiderId = pujaAlta?.CompradorId, // <-- ¡ESTA ERA LA LÍNEA QUE FALTABA!
+            CompradorLiderId = pujaAlta?.CompradorId, 
             OfertaMasAltaActual = pujaAlta?.Monto ?? subasta.PrecioBase,
             CantidadOfertas = pujas.Count(),
             FechaInicio = subasta.FechaInicio,

@@ -96,7 +96,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-// ⚠️ Importante: UseAuthentication debe ir SIEMPRE antes de UseAuthorization
 app.UseAuthentication();
 app.UseAuthorization();
 
