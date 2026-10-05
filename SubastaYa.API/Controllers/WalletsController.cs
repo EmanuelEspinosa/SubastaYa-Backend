@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using SubastaYa.Application.Abstractions;
+using SubastaYa.Application.Commands.Billetera;
 using SubastaYa.Application.DTOs.Billetera;
 using SubastaYa.Application.Interfaces;
+using SubastaYa.Application.Queries;
 
 namespace SubastaYa.API.Controllers;
 
@@ -8,34 +11,35 @@ namespace SubastaYa.API.Controllers;
 [Route("api/wallet")]
 public class WalletsController : ControllerBase
 {
-    private readonly IBilleteraService _billeteraService;
-
-    public WalletsController(IBilleteraService billeteraService)
-    {
-        _billeteraService = billeteraService;
-    }
-
-    // GET /api/wallet/balance?usuarioId=2 (Consulta desglose de saldos)
+    // GET /api/wallet/balance?usuarioId=2
     [HttpGet("balance")]
-    public async Task<ActionResult<BilleteraDto>> ObtenerBalance([FromQuery] int usuarioId)
+    public async Task<ActionResult<BilleteraDto>> ObtenerBalance(
+        [FromQuery] int usuarioId,
+        [FromServices] IQueryHandler<ObtenerSaldoPorUsuarioIdQuery, BilleteraDto> handler)
     {
-        var balance = await _billeteraService.ObtenerSaldoPorUsuarioIdAsync(usuarioId);
+        var query = new ObtenerSaldoPorUsuarioIdQuery(usuarioId);
+        var balance = await handler.HandleAsync(query);
         return Ok(balance);
     }
 
-    // POST /api/wallet/deposit (Carga de saldo simulada)
+    // POST /api/wallet/deposit
     [HttpPost("deposit")]
-    public async Task<ActionResult<BilleteraDto>> CargarSaldo([FromBody] CargarSaldoDto dto)
+    public async Task<ActionResult<BilleteraDto>> CargarSaldo(
+        [FromBody] CargarSaldoCommand command,
+        [FromServices] ICommandHandler<CargarSaldoCommand, BilleteraDto> handler)
     {
-        var balanceActualizado = await _billeteraService.CargarSaldoAsync(dto);
+        var balanceActualizado = await handler.HandleAsync(command);
         return Ok(balanceActualizado);
     }
 
-    // GET /api/wallet/transactions?usuarioId=2 (Historial de Movimientos del Ledger)
+    // GET /api/wallet/transactions?usuarioId=2
     [HttpGet("transactions")]
-    public async Task<ActionResult<IEnumerable<TransaccionLedgerDto>>> ObtenerTransacciones([FromQuery] int usuarioId)
+    public async Task<ActionResult<IEnumerable<TransaccionLedgerDto>>> ObtenerTransacciones(
+        [FromQuery] int usuarioId,
+        [FromServices] IQueryHandler<ObtenerMovimientosPorUsuarioIdQuery, IEnumerable<TransaccionLedgerDto>> handler)
     {
-        var movimientos = await _billeteraService.ObtenerMovimientosPorUsuarioIdAsync(usuarioId);
+        var query = new ObtenerMovimientosPorUsuarioIdQuery(usuarioId);
+        var movimientos = await handler.HandleAsync(query);
         return Ok(movimientos);
     }
 }
