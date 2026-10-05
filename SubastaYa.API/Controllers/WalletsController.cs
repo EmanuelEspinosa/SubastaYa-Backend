@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using SubastaYa.Application.Abstractions;
 using SubastaYa.Application.Commands.Billetera;
 using SubastaYa.Application.DTOs.Billetera;
-using SubastaYa.Application.Interfaces;
 using SubastaYa.Application.Queries.Billetera;
 
 namespace SubastaYa.API.Controllers;

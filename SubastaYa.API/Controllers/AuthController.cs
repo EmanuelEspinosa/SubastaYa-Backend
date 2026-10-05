@@ -2,7 +2,6 @@
 using SubastaYa.Application.Abstractions;
 using SubastaYa.Application.Commands.Auth;
 using SubastaYa.Application.DTOs.Auth;
-using SubastaYa.Application.Interfaces;
 
 namespace SubastaYa.API.Controllers
 {
