@@ -3,8 +3,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SubastaYa.API.Middlewares;
-using SubastaYa.Application.Interfaces;
-using SubastaYa.Application.Services;
+using SubastaYa.Application.Abstractions;
+using SubastaYa.Application.Commands.Auth;
+using SubastaYa.Application.Commands.Billetera;
+using SubastaYa.Application.Commands.Pujas;
+using SubastaYa.Application.Commands.Subastas;
+using SubastaYa.Application.DTOs.Auth;
+using SubastaYa.Application.DTOs.Billetera;
+using SubastaYa.Application.DTOs.Pujas;
+using SubastaYa.Application.DTOs.Subastas;
+using SubastaYa.Application.Queries.Billetera;
+using SubastaYa.Application.Queries.Pujas;
+using SubastaYa.Application.Queries.Subastas;
 using SubastaYa.Domain.Interfaces;
 using SubastaYa.Infrastructure.Context;
 using SubastaYa.Infrastructure.Repositories;
@@ -32,11 +42,24 @@ builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<ITransaccionLedgerRepository, TransaccionLedgerRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
-// 4. Inyección de Dependencias: Servicios de Negocio (Application)
-builder.Services.AddScoped<IBilleteraService, BilleteraService>();
-builder.Services.AddScoped<ISubastaService, SubastaService>();
-builder.Services.AddScoped<IPujaService, PujaService>();
-builder.Services.AddScoped<IAuthService, AuthService>(); // 👈 Inyección del Servicio de Auth
+// 4. Inyección de Dependencias: Handlers CQRS Custom (Application)
+// Auth
+builder.Services.AddScoped<ICommandHandler<RegistrarUsuarioCommand, AuthResponseDto?>, RegistrarUsuarioCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<LoginCommand, AuthResponseDto?>, LoginCommandHandler>();
+
+// Billetera
+builder.Services.AddScoped<ICommandHandler<CargarSaldoCommand, BilleteraDto>, CargarSaldoCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerSaldoPorUsuarioIdQuery, BilleteraDto>, ObtenerSaldoPorUsuarioIdQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerMovimientosPorUsuarioIdQuery, IEnumerable<TransaccionLedgerDto>>, ObtenerMovimientosPorUsuarioIdQueryHandler>();
+
+// Pujas
+builder.Services.AddScoped<ICommandHandler<RealizarPujaCommand, ResultadoPujaDto>, RealizarPujaCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerHistorialPujasQuery, IEnumerable<PujaDto>>, ObtenerHistorialPujasQueryHandler>();
+
+// Subastas
+builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, SubastaDto>, CrearSubastaCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IEnumerable<SubastaDto>>, ObtenerCatalogoQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDto>, ObtenerSubastaPorIdQueryHandler>();
 
 // 5. Configurar Middleware de Autenticación con JWT Bearer
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -63,7 +86,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 6. Configurar CORS para cuando conectemos el Frontend
+// 6. Configurar CORS para el Frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -95,10 +118,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

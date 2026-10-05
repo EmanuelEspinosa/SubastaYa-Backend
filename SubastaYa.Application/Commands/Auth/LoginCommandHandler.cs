@@ -1,72 +1,38 @@
-﻿using SubastaYa.Application.DTOs.Auth;
-using SubastaYa.Application.Interfaces;
-using SubastaYa.Domain.Entities;
-using SubastaYa.Domain.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using SubastaYa.Application.Abstractions;
+using SubastaYa.Application.DTOs.Auth;
+using SubastaYa.Domain.Entities;
+using SubastaYa.Domain.Interfaces;
+using BCrypt.Net;
 
-namespace SubastaYa.Application.Services
+
+namespace SubastaYa.Application.Commands.Auth
 {
-    public class AuthService : IAuthService
+    public class LoginCommandHandler : ICommandHandler<LoginCommand, AuthResponseDto?>
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IUsuarioRepository usuarioRepository, IConfiguration configuration)
+        public LoginCommandHandler(IUsuarioRepository usuarioRepository, IConfiguration configuration)
         {
             _usuarioRepository = usuarioRepository;
             _configuration = configuration;
         }
 
-        public async Task<AuthResponseDto?> RegisterAsync(RegistroDto dto)
+        public async Task<AuthResponseDto?> HandleAsync(LoginCommand command, CancellationToken cancellationToken = default)
         {
-            var usuarioExistente = await _usuarioRepository.ObtenerPorEmailAsync(dto.Email);
-            if (usuarioExistente != null)
-                return null;
-
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
-            // Instancia de Usuario con Billetera inicializada en $0
-            var nuevoUsuario = new Usuario
-            {
-                Nombre = dto.Nombre,
-                Email = dto.Email,
-                PasswordHash = passwordHash,
-                FechaRegistro = DateTime.UtcNow,
-                Billetera = new Billetera
-                {
-                    SaldoTotal = 0m,
-                    SaldoRetenido = 0m,
-                    SaldoDisponible = 0m
-                }
-            };
-
-            await _usuarioRepository.AgregarAsync(nuevoUsuario);
-
-            string token = GenerarJwtToken(nuevoUsuario);
-
-            return new AuthResponseDto
-            {
-                UsuarioId = nuevoUsuario.Id,
-                Nombre = nuevoUsuario.Nombre,
-                Email = nuevoUsuario.Email,
-                Token = token
-            };
-        }
-
-        public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
-        {
-            var usuario = await _usuarioRepository.ObtenerPorEmailAsync(dto.Email);
+            var usuario = await _usuarioRepository.ObtenerPorEmailAsync(command.Email);
             if (usuario == null) return null;
 
-            bool passwordValida = BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash);
+            bool passwordValida = BCrypt.Net.BCrypt.Verify(command.Password, usuario.PasswordHash);
             if (!passwordValida) return null;
 
             string token = GenerarJwtToken(usuario);
