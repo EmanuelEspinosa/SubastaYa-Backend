@@ -8,7 +8,7 @@ using SubastaYa.Application.DTOs.Billetera;
 using SubastaYa.Domain.Exceptions;
 using SubastaYa.Domain.Interfaces;
 
-namespace SubastaYa.Application.Queries
+namespace SubastaYa.Application.Queries.Billetera
 {
     public class ObtenerSaldoPorUsuarioIdQueryHandler : IQueryHandler<ObtenerSaldoPorUsuarioIdQuery, BilleteraDto>
     {

@@ -41,7 +41,7 @@ namespace SubastaYa.Application.Commands.Auth
                 Email = command.Email,
                 PasswordHash = passwordHash,
                 FechaRegistro = DateTime.UtcNow,
-                Billetera = new Billetera
+                Billetera = new SubastaYa.Domain.Entities.Billetera
                 {
                     SaldoTotal = 0m,
                     SaldoRetenido = 0m,

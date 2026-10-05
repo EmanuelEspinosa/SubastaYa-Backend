@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SubastaYa.Application.Abstractions;
 using SubastaYa.Application.DTOs.Billetera;
 
-namespace SubastaYa.Application.Queries
+namespace SubastaYa.Application.Queries.Billetera
 {
-    public record ObtenerMovimientosPorUsuarioIdQuery(int UsuarioId) : IQuery<IEnumerable<TransaccionLedgerDto>>;
+    public record ObtenerSaldoPorUsuarioIdQuery(int UsuarioId) : IQuery<BilleteraDto>;
 }

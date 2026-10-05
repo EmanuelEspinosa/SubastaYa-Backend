@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using SubastaYa.Application.Abstractions;
+using SubastaYa.Application.Commands.Pujas;
 using SubastaYa.Application.DTOs.Pujas;
 using SubastaYa.Application.DTOs.Subastas;
 using SubastaYa.Application.Interfaces;
+using SubastaYa.Application.Queries.Pujas;
 using SubastaYa.Domain.Enums;
 
 namespace SubastaYa.API.Controllers;
@@ -49,18 +52,24 @@ public class AuctionsController : ControllerBase
 
     // POST /api/auctions/{id}/bids (Realizar puja con Escrow y Anti-Sniping)
     [HttpPost("{id:int}/bids")]
-    public async Task<ActionResult<ResultadoPujaDto>> RealizarPuja(int id, [FromBody] CrearPujaDto dto)
+    public async Task<ActionResult<ResultadoPujaDto>> RealizarPuja(
+        int id,
+        [FromBody] CrearPujaDto dto,
+        [FromServices] ICommandHandler<RealizarPujaCommand, ResultadoPujaDto> handler)
     {
-        dto.SubastaId = id;
-        var resultado = await _pujaService.RealizarPujaAsync(dto);
+        var command = new RealizarPujaCommand(id, dto.CompradorId, dto.Monto);
+        var resultado = await handler.HandleAsync(command);
         return Ok(resultado);
     }
 
     // GET /api/auctions/{id}/bids (Historial para la sala en vivo)
     [HttpGet("{id:int}/bids")]
-    public async Task<ActionResult<IEnumerable<PujaDto>>> ObtenerHistorialPujas(int id)
+    public async Task<ActionResult<IEnumerable<PujaDto>>> ObtenerHistorialPujas(
+        int id,
+        [FromServices] IQueryHandler<ObtenerHistorialPujasQuery, IEnumerable<PujaDto>> handler)
     {
-        var historial = await _pujaService.ObtenerHistorialPorSubastaIdAsync(id);
+        var query = new ObtenerHistorialPujasQuery(id);
+        var historial = await handler.HandleAsync(query);
         return Ok(historial);
     }
 }

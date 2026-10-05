@@ -7,7 +7,7 @@ using SubastaYa.Application.Abstractions;
 using SubastaYa.Application.DTOs.Billetera;
 using SubastaYa.Domain.Interfaces;
 
-namespace SubastaYa.Application.Queries
+namespace SubastaYa.Application.Queries.Billetera
 {
     public class ObtenerMovimientosPorUsuarioIdQueryHandler : IQueryHandler<ObtenerMovimientosPorUsuarioIdQuery, IEnumerable<TransaccionLedgerDto>>
     {
