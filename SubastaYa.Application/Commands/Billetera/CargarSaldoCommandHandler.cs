@@ -9,6 +9,7 @@ using SubastaYa.Domain.Entities;
 using SubastaYa.Domain.Enums;
 using SubastaYa.Domain.Exceptions;
 using SubastaYa.Domain.Interfaces;
+using System.Transactions;
 
 namespace SubastaYa.Application.Commands.Billetera
 {
@@ -37,6 +38,14 @@ namespace SubastaYa.Application.Commands.Billetera
             if (billetera == null)
                 throw new DomainException($"No se encontró la billetera del usuario {command.UsuarioId}.");
 
+            var ahora = DateTime.UtcNow;
+
+            // =========================================================================
+            // BLOQUE TRANSACCIONAL ATÓMICO (Cumple con requerimiento B07)
+            // =========================================================================
+
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
             // Actualizar saldos
             billetera.SaldoTotal += command.Monto;
             billetera.SaldoDisponible += command.Monto;
@@ -61,8 +70,11 @@ namespace SubastaYa.Application.Commands.Billetera
                 Accion = TipoAccionAuditoria.AcreditacionSaldo.ToString(),
                 UsuarioId = command.UsuarioId,
                 DetalleJson = $"{{\"montoCargado\": {command.Monto}, \"nuevoTotal\": {billetera.SaldoTotal}}}",
-                Fecha = DateTime.UtcNow
+                Fecha = ahora
             });
+
+            // Confirmar transacción atómica completa (All-or-Nothing)
+            scope.Complete();
 
             return new BilleteraDto
             {
