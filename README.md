@@ -142,12 +142,12 @@ Todos los usuarios precargados en la base de datos (`vendedor@test.com`, `compra
 | **POST** | `/api/auctions/{id}/bids` | Registro de puja (evalúa saldo, ejecuta Escrow atómico y Anti-Sniping). | `200 OK`, `409 Conflict`, `422 Unprocessable` |
 | **GET** | `/api/auctions/{id}/bids` | Historial cronológico de pujas anonimizadas para la sala en vivo. | `200 OK`, `404 Not Found` |
 
-### Billetera Virtual (`/api/wallet`)
+### Billetera Virtual (`/api/wallets`)
 | Método | Endpoint | Descripción | Códigos de Estado HTTP |
 |:---:|---|---|---|
-| **GET** | `/api/wallet/balance?usuarioId={id}` | Desglose de saldos: Total, Retenido en Escrow y Disponible. | `200 OK`, `404 Not Found` |
-| **GET** | `/api/wallet/transactions?usuarioId={id}` | Historial de moviminetos financieros. Permite consultar detalle de ingresos, retenciones por ofertas, liberaciones y débitos finales por subastas ganadas | `200 OK` |
-| **POST** | `/api/wallet/deposit` | Acreditación simulada de fondos con asiento en Ledger y auditoría. | `200 OK`, `400 Bad Request` |
+| **GET** | `/api/wallets/balance?usuarioId={id}` | Desglose de saldos: Total, Retenido en Escrow y Disponible. | `200 OK`, `404 Not Found` |
+| **GET** | `/api/wallets/transactions?usuarioId={id}` | Historial de movimientos financieros. Permite consultar detalle de ingresos, retenciones por ofertas, liberaciones y débitos finales por subastas ganadas | `200 OK` |
+| **POST** | `/api/wallets/deposit` | Acreditación simulada de fondos con asiento en Ledger y auditoría. | `200 OK`, `400 Bad Request` |
 
 ### Autenticación (`/api/auth`)
 | Método | Endpoint | Descripción | Códigos de Estado HTTP |

@@ -7,7 +7,7 @@ using SubastaYa.Application.Queries.Billetera;
 namespace SubastaYa.API.Controllers;
 
 [ApiController]
-[Route("api/wallet")]
+[Route("api/wallets")]
 public class WalletsController : ControllerBase
 {
     // GET /api/wallet/balance?usuarioId=2
