@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SubastaYa.Domain.Exceptions;
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 
@@ -29,29 +30,39 @@ public class ExceptionMiddleware
         }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        var correlationId = Activity.Current?.Id ?? Guid.NewGuid().ToString();
         context.Response.ContentType = "application/json";
 
-        // Mapeo preciso de códigos de estado HTTP según la rúbrica del TP
-var statusCode = exception switch
+        var statusCode = exception switch
         {
-            SubastaNoEncontradaException => HttpStatusCode.NotFound, // 404
-            ConflictoConcurrenciaException or DbUpdateConcurrencyException => HttpStatusCode.Conflict, // 409 Conflict
-            SaldoInsuficienteException or PujaInvalidaException or SubastaNoActivaException => HttpStatusCode.UnprocessableEntity, // 422
-            DomainException => HttpStatusCode.BadRequest, // 400 Bad Request
-            _ => HttpStatusCode.InternalServerError // 500
+            SubastaNoEncontradaException => HttpStatusCode.NotFound,
+            ConflictoConcurrenciaException or DbUpdateConcurrencyException => HttpStatusCode.Conflict,
+            SaldoInsuficienteException or PujaInvalidaException or SubastaNoActivaException => HttpStatusCode.UnprocessableEntity,
+            DomainException => HttpStatusCode.BadRequest,
+            _ => HttpStatusCode.InternalServerError
+        };
+        context.Response.StatusCode = (int)statusCode;
+
+        // NUNCA exponer detalles internos: solo mensajes de negocio seguros
+        var mensaje = exception switch
+        {
+            DomainException d => d.Message,
+            DbUpdateConcurrencyException => "El recurso fue modificado concurrentemente por otra transacción. Reintente.",
+            _ => $"Error interno del servidor. Referencia: {correlationId}"
         };
 
-        context.Response.StatusCode = (int)statusCode;
+        _logger.LogError(exception, "[{CorrelationId}] Error {StatusCode}: {Message}",
+            correlationId, (int)statusCode, exception.Message);
 
         var response = new
         {
             statusCode = context.Response.StatusCode,
-            message = exception.Message,
-            errorType = exception.GetType().Name
+            message = mensaje,
+            errorType = exception.GetType().Name,
+            correlationId
         };
-
         return context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }

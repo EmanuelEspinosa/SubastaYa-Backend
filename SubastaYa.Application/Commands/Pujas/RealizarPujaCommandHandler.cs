@@ -196,22 +196,17 @@ namespace SubastaYa.Application.Commands.Pujas
 
         private async Task AuditarRechazoAsync(int subastaId, int compradorId, decimal monto, string motivo)
         {
-            try
-            {
-                await _auditoriaRepository.AgregarAsync(new AuditoriaLog
-                {
-                    Entidad = "SUBASTA",
-                    EntidadId = subastaId,
-                    Accion = "PUJA_RECHAZADA",
-                    UsuarioId = compradorId,
-                    DetalleJson = $"{{\"montoOfertado\": {monto}, \"motivo\": \"{motivo}\"}}",
-                    Fecha = DateTime.UtcNow
-                });
-            }
-            catch
-            {
-                // Ignorar excepción secundaría de auditoría
-            }
+             // Auditoría OBLIGATORIA: si falla, la excepción propaga y el middleware
+             // la registra con contexto. Ya no se silencia con catch vacío (B08/C07).
+         await _auditoriaRepository.AgregarAsync(new AuditoriaLog
+             {
+          Entidad = "SUBASTA",
+          EntidadId = subastaId,
+          Accion = "PUJA_RECHAZADA",
+          UsuarioId = compradorId,
+          DetalleJson = $"{{\"montoOfertado\": {monto}, \"motivo\": \"{motivo}\"}}",
+          Fecha = DateTime.UtcNow
+             });
         }
     }
 }
