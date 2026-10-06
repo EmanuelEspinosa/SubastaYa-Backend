@@ -13,5 +13,7 @@ namespace SubastaYa.Domain.Interfaces
         // Para mostrar el historial en la sala en vivo:
         Task<IEnumerable<Puja>> ObtenerPorSubastaIdAsync(int subastaId);
         Task<Puja?> ObtenerPujaMasAltaAsync(int subastaId);
+                // Para Mis Pujas (actividades del comprador) con subasta y sus pujas incluidas:
+        Task<IEnumerable<Puja>> ObtenerPorCompradorAsync(int compradorId);
     }
 }

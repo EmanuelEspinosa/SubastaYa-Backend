@@ -43,5 +43,13 @@ namespace SubastaYa.Infrastructure.Repositories
                 .OrderByDescending(p => p.Monto)
                 .FirstOrDefaultAsync();
         }
+                public async Task<IEnumerable<Puja>> ObtenerPorCompradorAsync(int compradorId)
+        {
+            return await _context.Pujas
+                .Include(p => p.Subasta).ThenInclude(s => s.Pujas)
+                .Where(p => p.CompradorId == compradorId)
+                .OrderByDescending(p => p.FechaPuja)
+                .ToListAsync();
+        }
     }
 }

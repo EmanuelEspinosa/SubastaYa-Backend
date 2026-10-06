@@ -18,6 +18,8 @@ using SubastaYa.Application.Queries.Subastas;
 using SubastaYa.Domain.Interfaces;
 using SubastaYa.Infrastructure.Context;
 using SubastaYa.Infrastructure.Repositories;
+using SubastaYa.Application.DTOs.Actividades;
+using SubastaYa.Application.Queries.Actividades;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +60,9 @@ builder.Services.AddScoped<IQueryHandler<ObtenerHistorialPujasQuery, IEnumerable
 
 // Subastas
 builder.Services.AddScoped<ICommandHandler<CrearSubastaCommand, SubastaDto>, CrearSubastaCommandHandler>();
-builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, IEnumerable<SubastaDto>>, ObtenerCatalogoQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerCatalogoQuery, ResultadoPaginadoDto<SubastaDto>>, ObtenerCatalogoQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerMisPujasQuery, IEnumerable<ActividadPujaDto>>, ObtenerMisPujasQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<ObtenerMisPublicacionesQuery, IEnumerable<ActividadPublicacionDto>>, ObtenerMisPublicacionesQueryHandler>();
 builder.Services.AddScoped<IQueryHandler<ObtenerSubastaPorIdQuery, SubastaDto>, ObtenerSubastaPorIdQueryHandler>();
 
 // 5. Configurar Middleware de Autenticación con JWT Bearer
