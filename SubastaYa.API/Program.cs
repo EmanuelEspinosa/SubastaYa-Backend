@@ -17,6 +17,7 @@ using SubastaYa.Application.Queries.Pujas;
 using SubastaYa.Application.Queries.Subastas;
 using SubastaYa.Domain.Interfaces;
 using SubastaYa.Infrastructure.Context;
+using SubastaYa.Infrastructure.Persistence; 
 using SubastaYa.Infrastructure.Repositories;
 using SubastaYa.Application.DTOs.Actividades;
 using SubastaYa.Application.Queries.Actividades;
@@ -103,11 +104,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 7. Aplicar migraciones pendientes automáticamente al arrancar
+// 7. Aplicar migraciones pendientes y Sembrado Dinámico de Datos automáticamente al arrancar
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<SubastaYaDbContext>();
     dbContext.Database.Migrate();
+    await DbInitializer.SeedAsync(dbContext);
 }
 
 // 8. Middleware global para manejo de errores (400, 404, 409 Conflict)
