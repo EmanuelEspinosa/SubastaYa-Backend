@@ -7,16 +7,16 @@ Proyecto integral de comercio electrónico y subastas en tiempo real con respald
 
 ---
 
-## 🏛️ Arquitectura del Sistema (Clean Architecture)
+## 🏛️ Arquitectura del Sistema (Clean Architecture + Custom CQRS)
 
-El backend implementa de forma estricta los principios de **Clean Architecture** (Arquitectura Limpia), separando responsabilidades en cuatro capas desacopladas:
+El backend implementa de forma estricta los principios de **Clean Architecture** desglosando los casos de uso mediante el patrón **CQRS Custom (Command Query Responsibility Segregation)** con DTOs, `Commands`, `Queries` y `Handlers` dedicados por cada operación de lectura y escritura:
 
 ```
 SubastaYa-Backend/
 ├── SubastaYa.Domain/          # Núcleo puro: Entidades, Enums, Excepciones y Contratos de Repositorios.
-├── SubastaYa.Application/     # Casos de uso: DTOs, Servicios de Dominio (Escrow, Anti-Sniping, Billetera).
-├── SubastaYa.Infrastructure/  # Acceso a datos: DbContext, Migraciones Code-First y Repositorios EF Core.
-├── SubastaYa.API/             # Presentación: Controladores RESTful, Middleware de Excepciones y Worker.
+├── SubastaYa.Application/     # CQRS: Commands, Queries, Handlers, DTOs y Servicios (Escrow, Anti-Sniping).
+├── SubastaYa.Infrastructure/  # Acceso a datos: DbContext, Migraciones Code-First, DbInitializer y Repositorios EF Core.
+├── SubastaYa.API/             # Presentación: Controladores RESTful (Invocación a Handlers), Middleware y Worker.
 └── SubastaYa.slnx             # Archivo de solución unificado.
 ```
 
@@ -85,7 +85,7 @@ Siguiendo las alternativas contempladas en la **página 5 del enunciado de la c�
 
 ## 📌 Datos Semilla Obligatorios (Seed Data)
 
-El sistema inicializa la base de datos con los escenarios exactos pedidos por la cátedra para la mesa de evaluación:
+El sistema inicializa la base de datos en tiempo de ejecución (`DbInitializer.cs`) calculando fechas dinámicas relativas al instante real de ejecución (`DateTime.UtcNow`), aplicando `RESEED` de identidades y garantizando la vigencia de los datos para la mesa de evaluación:
 
 * **4 Usuarios y Billeteras:**
   * `vendedor@test.com`: Saldo Total: $0.00.
@@ -93,13 +93,13 @@ El sistema inicializa la base de datos con los escenarios exactos pedidos por la
   * `comprador2@test.com`: Total: $200,000 | Disponible: $200,000 (Postor habilitado solvente).
   * `sinfondos@test.com`: Total: $500.00 | Disponible: $500.00 (Caso de prueba para rechazo por saldo insuficiente).
 * **4 Categorías:** Tecnología, Coleccionables, Indumentaria, Vehículos.
-* **5 Subastas (Casos de prueba):**
-  1. **Activa estándar:** Cierra en 30 min (con 2 pujas previas cargadas; lidera Comprador 1 con $45,000).
-  2. **Activa crítica:** Cierra en < 2 min (lista para probar alerta visual y extensión Anti-Sniping).
-  3. **Próxima:** Inicio programado a +24 hs (pujas bloqueadas por regla de negocio).
-  4. **Vencida con ganador:** Liquidada por el Worker automáticamente a estado `Finalizada` con transferencia de fondos.
-  5. **Vencida desierta:** Pasada por el Worker automáticamente a estado `Desierta`.
-* **Libro Mayor (`TransaccionesLedger`):** Asientos contables que justifican desde el inicio los depósitos y el saldo retenido de $45,000.
+* **5 Subastas (Casos de prueba relativas a `DateTime.UtcNow`):**
+  1. **PlayStation 5 (Caso A - Activa estándar):** Cierra en 7 días (`AddDays(7)`). Posee 2 pujas registradas; lidera Comprador 1 con $45,000.
+  2. **Apple iPhone 13 (Caso B - Activa extendida):** Cierra en 15 días (`AddDays(15)`).
+  3. **Figura De Acción Articulada (Caso C - Próxima):** Inicia en 2 días (`AddDays(2)`) y finaliza en 10 días (pujas bloqueadas por regla de negocio).
+  4. **Camiseta de Fútbol (Caso D - Vencida con ganador):** Venció ayer (`AddDays(-1)`), con oferta cargada de $35,000 de Comprador 1 (lista para liquidación por el Worker).
+  5. **Bicicleta Kanji R/29 (Caso E - Vencida desierta):** Venció hace 2 días (`AddDays(-2)`) sin ofertas (lista para pasar a Desierta por el Worker).
+* **Libro Mayor (`TransaccionesLedger`):** Asientos contables que respaldan depósitos, liberaciones y la retención inicial de $45,000.
 
 ---
 ## 🔒 Módulo de Autenticación & Seguridad (JWT + BCrypt)
@@ -136,11 +136,17 @@ Todos los usuarios precargados en la base de datos (`vendedor@test.com`, `compra
 ### Subastas (`/api/auctions`)
 | Método | Endpoint | Descripción | Códigos de Estado HTTP |
 |:---:|---|---|---|
-| **GET** | `/api/auctions` | Catálogo con filtros por estado (`?estado=`), categoría (`?categoriaId=`), por comprador (`?compradorId=`) y por vendedor (`?vendedorId=`)| `200 OK` |
+| **GET** | `/api/auctions` | Catálogo con filtros por estado, categoría, comprador, vendedor, búsqueda libre (`q`), ordenamiento (`orderBy`, `order`) y paginación server-side (`page`, `pageSize`). | `200 OK` |
 | **GET** | `/api/auctions/{id}` | Detalle completo de la subasta, estado y puja líder. | `200 OK`, `404 Not Found` |
 | **POST** | `/api/auctions` | Creación de nueva subasta con validación de fechas y precios. | `201 Created`, `422 Unprocessable` |
 | **POST** | `/api/auctions/{id}/bids` | Registro de puja (evalúa saldo, ejecuta Escrow atómico y Anti-Sniping). | `200 OK`, `409 Conflict`, `422 Unprocessable` |
 | **GET** | `/api/auctions/{id}/bids` | Historial cronológico de pujas anonimizadas para la sala en vivo. | `200 OK`, `404 Not Found` |
+
+### Actividades de Usuario (`/api/users/{usuarioId}`)
+| Método | Endpoint | Descripción | Códigos de Estado HTTP |
+|:---:|---|---|---|
+| **GET** | `/api/users/{usuarioId}/bids` | Consulta dedicada de subastas donde el usuario participó ("Mis Pujas"). | `200 OK`, `404 Not Found` |
+| **GET** | `/api/users/{usuarioId}/auctions` | Consulta dedicada de subastas creadas por el usuario ("Mis Publicaciones"). | `200 OK`, `404 Not Found` |
 
 ### Billetera Virtual (`/api/wallets`)
 | Método | Endpoint | Descripción | Códigos de Estado HTTP |
@@ -154,9 +160,6 @@ Todos los usuarios precargados en la base de datos (`vendedor@test.com`, `compra
 |:---:|---|---|---|
 | **POST** | `/api/auth/register` | Registro de nuevos usuarios con cifrado de contraseña (BCrypt), creación automática de Billetera Virtual en $0 y emisión de token JWT. | `200 OK`, `400 Bad Request` |
 | **POST** | `/api/auth/login` | Validación de credenciales (email y contraseña con BCrypt) y emisión de token de autenticación JWT. | `200 OK`, `401 Unauthorized` |
-
-
-
 
 ---
 
